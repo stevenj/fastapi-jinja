@@ -28,7 +28,7 @@ def global_init(template_folder: str, auto_reload=False, cache_init=True):
 
     template_path = template_folder
     __env = Environment(
-        loader=FileSystemLoader(template_folder), autoescape=select_autoescape(["html"])
+        loader=FileSystemLoader(template_folder, auto_reload=auto_reload), autoescape=select_autoescape(["html"])
     )
 
 
