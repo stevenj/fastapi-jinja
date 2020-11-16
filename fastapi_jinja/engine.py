@@ -96,9 +96,6 @@ def template(template_file: str, mimetype: str = "text/html"):
 
 def __render_response(template_file, response_val, request, mimetype):
 
-    # print(f"template_file : {template_file}")
-    # print(f"response_val : {response_val}")
-
     if isinstance(response_val, fastapi.Response):
         return response_val
 
@@ -113,8 +110,6 @@ def __render_response(template_file, response_val, request, mimetype):
     else:
         model["request"] = request
     
-    # print(f"model : {model}")
-
     if template_file and not isinstance(response_val, dict):
         msg = f"Invalid return type {type(response_val)}, we expected a dict as the return value."
         raise FastAPIJinjaException(msg)
