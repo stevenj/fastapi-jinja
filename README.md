@@ -34,8 +34,6 @@ In the app startup, tell the library about the folder you wish to use:
 import os
 import fastapi_jinja
 
-dev_mode = True
-
 folder = os.path.dirname(__file__)
 template_folder = os.path.join(folder, 'templates')
 template_folder = os.path.abspath(template_folder)
