@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <link href="{{ url_for('static', path='styles.css') }}" rel="stylesheet">
+    <title>{{ title }}</title>
+  </head>
+  <body>
+  <h1>{{ title }}</h1>
+    <table>
+    {% for user in users %}
+      <tr>
+        <td>
+          User : {{ user.username }}
+        </td>
+        <td>
+          <a href="{{ user.url }}">{{ user.username }}</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+    <br>
+    <hr>
+    <a href="{{ url_for('static', path='styles.css') }}">Styles</a>
+  </body>
+</html>

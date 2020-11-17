@@ -1,35 +1,34 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+
 import fastapi_jinja
 
 
 app = FastAPI()
 
-folder = os.path.dirname(__name__)
+folder = os.path.dirname(__file__)
 template_folder = os.path.join(folder, "templates")
-template_folder = os.path.abspath(template_folder)
+print(template_folder)
+static_folder = os.path.join(template_folder, "static")
+print(static_folder)
 
+app.mount("/static", StaticFiles(directory=static_folder), name="static")
 fastapi_jinja.global_init(template_folder)
 
 
 @app.get("/")
-async def root():
-  return {"message": "Hello World"}
-
-
-@app.get("/jinja")
-@fastapi_jinja.template("test.j2")
-async def jinja_test():
-
+@fastapi_jinja.template("test.html")
+async def root(request: Request):
   render_dict = {
     "title": "Test Title",
-    "users": [
-      {
-        'url': 'test_url',
-        'username': 'test_user',
-      }
-    ]
   }
 
-  return render_dict
+  user_ids = ["user-"+str(i) for i in range(10)]
+
+  users = [{"url": f"http://site/{user}", "username": user} for user in user_ids]
+
+  render_dict["users"] = users  
+
+  return render_dict, request

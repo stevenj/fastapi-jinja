@@ -4,19 +4,26 @@ from functools import wraps
 from typing import Optional
 
 import fastapi
-from jinja2 import Environment, FileSystemLoader, Template, select_autoescape
+
+from fastapi import FastAPI, Request
+
+from fastapi.templating import Jinja2Templates
+from jinja2.environment import TemplateStream
+# from jinja2 import Environment, FileSystemLoader, Template, select_autoescape
 
 from fastapi_jinja.exceptions import FastAPIJinjaException
 
-__env: Optional[Environment] = None
+__initialized = None
 template_path: Optional[str] = None
+templates = None
 
+def global_init(template_folder: str):
+    global __initialized, template_path, templates
 
-def global_init(template_folder: str, auto_reload=False, cache_init=True):
-    global __env, template_path
-
-    if __env and cache_init:
+    
+    if __initialized:
         return
+
 
     if not template_folder:
         msg = f"The template_folder must be specified."
@@ -26,24 +33,27 @@ def global_init(template_folder: str, auto_reload=False, cache_init=True):
         msg = f"The specified template folder must be a folder, it's not: {template_folder}"
         raise FastAPIJinjaException(msg)
 
-    template_path = template_folder
-    __env = Environment(
-        loader=FileSystemLoader(template_folder, auto_reload=auto_reload), autoescape=select_autoescape(["html"])
-    )
+    template_folder
+
+    templates = Jinja2Templates(directory=template_folder)
+    __initialized = True
 
 
 def clear():
-    global __env, template_path
-    __env = None
+    global __initialized, template_path
+    __initialized = None
     template_path = None
 
 
 def render(template_file: str, **template_data):
-    if not __env:
+    if not __initialized:
         raise Exception("You must call global_init() before rendering templates.")
 
-    page: Template = __env.get_template(template_file)
-    rendered_page = page.render(template_data)
+    # page: Template = __env.get_template(template_file)
+    # rendered_page = page.render(template_data)
+
+    print(templates)
+    rendered_page = templates.TemplateResponse(template_file, template_data)
     return rendered_page
 
 
@@ -68,13 +78,13 @@ def template(template_file: str, mimetype: str = "text/html"):
     def response_inner(f):
         @wraps(f)
         def sync_view_method(*args, **kwargs):
-            response_val = f(*args, **kwargs)
-            return __render_response(template_file, response_val, mimetype)
+            response_val, request = f(*args, **kwargs)
+            return __render_response(template_file, response_val, request, mimetype)
 
         @wraps(f)
         async def async_view_method(*args, **kwargs):
-            response_val = await f(*args, **kwargs)
-            return __render_response(template_file, response_val, mimetype)
+            response_val, request = await f(*args, **kwargs)
+            return __render_response(template_file, response_val, request, mimetype)
 
         if inspect.iscoroutinefunction(f):
             return async_view_method
@@ -84,8 +94,8 @@ def template(template_file: str, mimetype: str = "text/html"):
     return response_inner
 
 
-def __render_response(template_file, response_val, mimetype):
-    # sourcery skip: assign-if-exp
+def __render_response(template_file, response_val, request, mimetype):
+
     if isinstance(response_val, fastapi.Response):
         return response_val
 
@@ -94,9 +104,14 @@ def __render_response(template_file, response_val, mimetype):
     else:
         model = {}
 
+    if "request" in model:
+        msg = f"'request' can't be used as a key to be processed by jinja."
+        raise FastAPIJinjaException(msg)
+    else:
+        model["request"] = request
+    
     if template_file and not isinstance(response_val, dict):
         msg = f"Invalid return type {type(response_val)}, we expected a dict as the return value."
-        raise Exception(msg)
+        raise FastAPIJinjaException(msg)
 
-    html = render(template_file, **model)
-    return fastapi.Response(content=html, media_type=mimetype)
+    return render(template_file, **model)
