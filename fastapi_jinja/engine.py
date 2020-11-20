@@ -71,21 +71,13 @@ def template(template_file: str, mimetype: str = "text/html"):
 
         @wraps(f)
         def sync_view_method(*args, **kwargs):
-            request = None
-            for arg in args:
-                if isinstance(arg, Request):
-                    request = arg
-                    break
+            request = __get_request(*args, **kwargs)
             response_val = f(*args, **kwargs)
             return __render_response(template_file, response_val, request, mimetype)
 
         @wraps(f)
         async def async_view_method(*args, **kwargs):
-            request = None
-            for arg in args:
-                if isinstance(arg, Request):
-                    request = arg
-                    break
+            request = __get_request(*args, **kwargs)
             response_val = await f(*args, **kwargs)
             return __render_response(template_file, response_val, request, mimetype)
 
@@ -95,6 +87,14 @@ def template(template_file: str, mimetype: str = "text/html"):
             return sync_view_method
 
     return response_inner
+
+
+def __get_request(*args, **kwargs):
+    for arg in args:
+        if isinstance(arg, Request):
+            return arg
+    else:
+        return kwargs.get('request', None)
 
 
 def __render_response(template_file: str, response_val: dict, request: Request, mimetype: str):
