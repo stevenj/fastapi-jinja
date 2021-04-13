@@ -7,7 +7,7 @@ Adds integration of the Jinja template language to FastAPI. This is inspired and
 For the moment, this is not yet on pypi and is fairly unstable, but if you wish to used it directly from here, just do the following:
 
 ```bash
-pip install git+https://github.com/ageekinside/fastapi-jinja
+pip install git+https://github.com/stevenj/fastapi-jinja.git
 ```
 
 You may want to fork this repo and then use your URL until this is more final.
