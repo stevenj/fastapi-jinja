@@ -23,8 +23,8 @@ with open(requirements_txt, "r", encoding="utf-8") as fin:
 
 setup(
     name="fastapi-jinja",
-    version="0.1.0",
-    url="https://github.com/ageekinside/fastapi-jinja",
+    version="0.1.1",
+    url="https://github.com/stevenj/fastapi-jinja",
     license="MIT",
     author="Marc Brooks",
     author_email="marcwbrooks@gmail.com",
@@ -38,5 +38,7 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
 )
