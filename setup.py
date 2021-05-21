@@ -23,7 +23,7 @@ with open(requirements_txt, "r", encoding="utf-8") as fin:
 
 setup(
     name="fastapi-jinja",
-    version="0.1.1",
+    version="0.1.2",
     url="https://github.com/stevenj/fastapi-jinja",
     license="MIT",
     author="Marc Brooks",
